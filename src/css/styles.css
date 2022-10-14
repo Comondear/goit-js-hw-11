@@ -1,0 +1,11 @@
+.search-form {
+  background-color: grey;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 10px;
+}
+
+button {
+  border: 0ch;
+}
