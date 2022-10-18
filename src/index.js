@@ -117,7 +117,7 @@ function createMarkup(items) {
     .join(' ');
 }
 
-// --- Load more click ---
+
 // refs.loadMore.addEventListener('click', loadMoreClick);
 
 // function loadMoreClick() {
@@ -127,11 +127,36 @@ function createMarkup(items) {
 //   refs.loadMore.classList.add('hidden');
 // }
 
-window.addEventListener('scroll', () => {
-  const documentRect = document.documentElement.getBoundingClientRect();
-  if (documentRect.bottom < document.documentElement.clientHeight + 150) {
-    currentPage += 1;
-    fetchData();
-  }
-});
+////////////////////////////////////
 
+// window.addEventListener('scroll', () => {
+//   const documentRect = document.documentElement.getBoundingClientRect();
+//   if (documentRect.bottom < document.documentElement.clientHeight + 150) {
+//     currentPage += 1;
+//     fetchData();
+//   }
+// });
+
+///////////////////////////////
+const infinteObserver = new IntersectionObserver(
+  ([entry], observer) => {
+    // проверяем что достигли последнего элемента
+    if (entry.isIntersecting) {
+      // перестаем его отслеживать
+      observer.unobserve(entry.target);
+      // и загружаем новую порцию контента
+      currentPage++;
+      fetchData();
+    }
+  },
+  { threshold: 0.5 }
+);
+
+      // для последней карточки снова добавляем обзёрвер
+      const lastCard = document.querySelector(".photo-card");
+      if (lastCard) {
+        infinteObserver.observe(lastCard);
+};
+
+// делаем стартовую инициализацию
+// fetchImages();
