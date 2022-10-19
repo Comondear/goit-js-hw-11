@@ -9,9 +9,11 @@ const refs = {
   buttonForm: document.querySelector('.button-form'),
   gallery: document.querySelector('.gallery'),
   loadMore: document.querySelector('.load-more'),
+  input: document.querySelector('.input-form')
 };
 
 const { searchQuery } = refs.searchForm;
+
 
 const lightBox = new SimpleLightbox('.gallery a', {
   captionsData: 'alt',
@@ -38,12 +40,15 @@ async function fetchData() {
   }
 
   if (data.hits.length === 0) {
+
     Notiflix.Notify.failure(
       'Sorry, there are no images matching your search query. Please try again.',
       {
         position: 'center-center',
       }
     );
+    // target = null;
+    // controller.abort();
     refs.loadMore.classList.add('hidden');
     return;
   }
@@ -60,6 +65,9 @@ async function fetchData() {
   }
 }
 
+
+
+
 const handleSubmit = async event => {
   event.preventDefault();
   if (query === searchQuery.value) return;
@@ -68,8 +76,8 @@ const handleSubmit = async event => {
   refs.gallery.innerHTML = '';
   currentPage = 1;
   items = [];
-  if (!query) return;
 
+  if (!query) return;
   fetchData();
 };
 
@@ -77,7 +85,10 @@ refs.searchForm.addEventListener('submit', handleSubmit);
 
 function renderList(itemsData) {
   refs.gallery.insertAdjacentHTML('beforeend', createMarkup(itemsData));
+  const target = document.querySelector('.photo-card:last-child');
+  observer.observe(target);
   lightBox.refresh();
+  refs.input.value = '';
   refs.loadMore.classList.remove('hidden');
 }
 
@@ -117,6 +128,24 @@ function createMarkup(items) {
     .join(' ');
 }
 
+const observer = new IntersectionObserver(
+  ([entry], observer) => {
+    // проверяем что достигли последнего элемента
+    if (entry.isIntersecting) {
+      // перестаем его отслеживать
+      observer.unobserve(entry.target);
+      // и загружаем новую порцию контента
+      currentPage++;
+      fetchData();
+    }
+  },
+  { threshold: 0.5 }
+);
+
+// let controller = new AbortController(observer);
+
+//////////////////////////////////////////////////
+
 
 // refs.loadMore.addEventListener('click', loadMoreClick);
 
@@ -137,26 +166,3 @@ function createMarkup(items) {
 //   }
 // });
 
-///////////////////////////////
-const infinteObserver = new IntersectionObserver(
-  ([entry], observer) => {
-    // проверяем что достигли последнего элемента
-    if (entry.isIntersecting) {
-      // перестаем его отслеживать
-      observer.unobserve(entry.target);
-      // и загружаем новую порцию контента
-      currentPage++;
-      fetchData();
-    }
-  },
-  { threshold: 0.5 }
-);
-
-      // для последней карточки снова добавляем обзёрвер
-      const lastCard = document.querySelector(".photo-card");
-      if (lastCard) {
-        infinteObserver.observe(lastCard);
-};
-
-// делаем стартовую инициализацию
-// fetchImages();
